@@ -26,6 +26,7 @@ import {
   stopContainer,
 } from './container-runtime.js';
 import { detectAuthMode } from './credential-proxy.js';
+import { readEnvFile } from './env.js';
 import { validateAdditionalMounts } from './mount-security.js';
 import { RegisteredGroup } from './types.js';
 
@@ -226,6 +227,14 @@ function buildContainerArgs(
     '-e',
     `ANTHROPIC_BASE_URL=http://${CONTAINER_HOST_GATEWAY}:${CREDENTIAL_PROXY_PORT}`,
   );
+
+  // Pass through optional Groq API key for delegated fast/cheap tasks
+  const groqKey =
+    process.env.GROQ_API_KEY ||
+    readEnvFile(['GROQ_API_KEY']).GROQ_API_KEY;
+  if (groqKey) {
+    args.push('-e', `GROQ_API_KEY=${groqKey}`);
+  }
 
   // Mirror the host's auth method with a placeholder value.
   // API key mode: SDK sends x-api-key, proxy replaces with real key.
