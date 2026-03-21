@@ -1,7 +1,14 @@
 #!/bin/bash
 # Sheep CLI — start, stop, and manage your mentor agent
 
-SHEEP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Resolve symlinks so this works from ~/.local/bin/sheep → ~/sheep/bin/sheep
+SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SHEEP_DIR="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
 DASHBOARD_URL="http://localhost:3800"
 
 case "${1:-}" in
