@@ -18,12 +18,26 @@ import { ASSISTANT_NAME, GROUPS_DIR, STORE_DIR, TIMEZONE } from '../config.js';
 import { logger } from '../logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PUBLIC_DIR = path.join(__dirname, '..', '..', 'src', 'dashboard', 'public');
+const PUBLIC_DIR = path.join(
+  __dirname,
+  '..',
+  '..',
+  'src',
+  'dashboard',
+  'public',
+);
 
-export const DASHBOARD_PORT = parseInt(process.env.DASHBOARD_PORT || '3800', 10);
+export const DASHBOARD_PORT = parseInt(
+  process.env.DASHBOARD_PORT || '3800',
+  10,
+);
 
 interface RouteHandler {
-  (req: IncomingMessage, res: ServerResponse, params: Record<string, string>): Promise<void> | void;
+  (
+    req: IncomingMessage,
+    res: ServerResponse,
+    params: Record<string, string>,
+  ): Promise<void> | void;
 }
 
 const MIME_TYPES: Record<string, string> = {
@@ -79,7 +93,11 @@ function apiTasks(_req: IncomingMessage, res: ServerResponse): void {
   json(res, getAllTasks());
 }
 
-async function apiTaskAction(req: IncomingMessage, res: ServerResponse, params: Record<string, string>): Promise<void> {
+async function apiTaskAction(
+  req: IncomingMessage,
+  res: ServerResponse,
+  params: Record<string, string>,
+): Promise<void> {
   const taskId = params.id;
   const task = getTaskById(taskId);
   if (!task) return json(res, { error: 'Task not found' }, 404);
@@ -99,11 +117,16 @@ async function apiTaskAction(req: IncomingMessage, res: ServerResponse, params: 
   json(res, { ok: true });
 }
 
-function apiMemory(_req: IncomingMessage, res: ServerResponse, params: Record<string, string>): void {
+function apiMemory(
+  _req: IncomingMessage,
+  res: ServerResponse,
+  params: Record<string, string>,
+): void {
   const folder = params.folder || 'discord_main';
   const groupDir = path.join(GROUPS_DIR, folder);
 
-  if (!fs.existsSync(groupDir)) return json(res, { error: 'Group not found' }, 404);
+  if (!fs.existsSync(groupDir))
+    return json(res, { error: 'Group not found' }, 404);
 
   const files: { name: string; content: string; size: number }[] = [];
   for (const file of fs.readdirSync(groupDir)) {
@@ -121,13 +144,18 @@ function apiMemory(_req: IncomingMessage, res: ServerResponse, params: Record<st
   json(res, files);
 }
 
-function apiConversations(_req: IncomingMessage, res: ServerResponse, params: Record<string, string>): void {
+function apiConversations(
+  _req: IncomingMessage,
+  res: ServerResponse,
+  params: Record<string, string>,
+): void {
   const folder = params.folder || 'discord_main';
   const convDir = path.join(GROUPS_DIR, folder, 'conversations');
 
   if (!fs.existsSync(convDir)) return json(res, []);
 
-  const files = fs.readdirSync(convDir)
+  const files = fs
+    .readdirSync(convDir)
     .filter((f) => f.endsWith('.md'))
     .sort()
     .reverse()
@@ -146,14 +174,20 @@ function apiConversations(_req: IncomingMessage, res: ServerResponse, params: Re
   json(res, files);
 }
 
-async function apiMemoryUpdate(req: IncomingMessage, res: ServerResponse, params: Record<string, string>): Promise<void> {
+async function apiMemoryUpdate(
+  req: IncomingMessage,
+  res: ServerResponse,
+  params: Record<string, string>,
+): Promise<void> {
   const folder = params.folder || 'discord_main';
   const body = JSON.parse(await readBody(req));
-  if (!body.name || !body.content) return json(res, { error: 'name and content required' }, 400);
+  if (!body.name || !body.content)
+    return json(res, { error: 'name and content required' }, 400);
 
   // Sanitize filename
   const safeName = path.basename(body.name);
-  if (!safeName.endsWith('.md')) return json(res, { error: 'Only .md files allowed' }, 400);
+  if (!safeName.endsWith('.md'))
+    return json(res, { error: 'Only .md files allowed' }, 400);
 
   const filePath = path.join(GROUPS_DIR, folder, safeName);
   fs.writeFileSync(filePath, body.content, 'utf-8');
@@ -162,15 +196,42 @@ async function apiMemoryUpdate(req: IncomingMessage, res: ServerResponse, params
 
 // --- Router ---
 
-function matchRoute(method: string, url: string): { handler: RouteHandler; params: Record<string, string> } | null {
-  const routes: Array<{ method: string; pattern: RegExp; handler: RouteHandler }> = [
+function matchRoute(
+  method: string,
+  url: string,
+): { handler: RouteHandler; params: Record<string, string> } | null {
+  const routes: Array<{
+    method: string;
+    pattern: RegExp;
+    handler: RouteHandler;
+  }> = [
     { method: 'GET', pattern: /^\/api\/status$/, handler: apiStatus },
     { method: 'GET', pattern: /^\/api\/tasks$/, handler: apiTasks },
-    { method: 'PATCH', pattern: /^\/api\/tasks\/(?<id>[^/]+)$/, handler: apiTaskAction },
-    { method: 'DELETE', pattern: /^\/api\/tasks\/(?<id>[^/]+)$/, handler: apiTaskAction },
-    { method: 'GET', pattern: /^\/api\/memory(?:\/(?<folder>[^/]+))?$/, handler: apiMemory },
-    { method: 'PUT', pattern: /^\/api\/memory(?:\/(?<folder>[^/]+))?$/, handler: apiMemoryUpdate },
-    { method: 'GET', pattern: /^\/api\/conversations(?:\/(?<folder>[^/]+))?$/, handler: apiConversations },
+    {
+      method: 'PATCH',
+      pattern: /^\/api\/tasks\/(?<id>[^/]+)$/,
+      handler: apiTaskAction,
+    },
+    {
+      method: 'DELETE',
+      pattern: /^\/api\/tasks\/(?<id>[^/]+)$/,
+      handler: apiTaskAction,
+    },
+    {
+      method: 'GET',
+      pattern: /^\/api\/memory(?:\/(?<folder>[^/]+))?$/,
+      handler: apiMemory,
+    },
+    {
+      method: 'PUT',
+      pattern: /^\/api\/memory(?:\/(?<folder>[^/]+))?$/,
+      handler: apiMemoryUpdate,
+    },
+    {
+      method: 'GET',
+      pattern: /^\/api\/conversations(?:\/(?<folder>[^/]+))?$/,
+      handler: apiConversations,
+    },
   ];
 
   for (const route of routes) {
@@ -218,7 +279,10 @@ export function startDashboard(): void {
 
     // CORS for local dev
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+    );
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (method === 'OPTIONS') {
       res.writeHead(204);
