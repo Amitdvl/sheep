@@ -27,7 +27,7 @@ Sheep tracks your projects, holds you accountable, and calls out procrastination
 ```bash
 git clone https://github.com/Amitdvl/sheep.git
 cd sheep
-npm install
+pnpm install
 cp .env.example .env
 ```
 
@@ -43,9 +43,9 @@ GROQ_API_KEY=gsk_...           # optional, for fast task delegation
 ### Build & Run
 
 ```bash
-npm run build                   # compile TypeScript
+pnpm build                   # compile TypeScript
 ./container/build.sh            # build agent container image
-npm run dev                     # start Sheep (dev mode with hot reload)
+pnpm dev                     # start Sheep (dev mode with hot reload)
 ```
 
 ### Register Your Discord Channel
