@@ -20,6 +20,15 @@ case "${1:-}" in
     fi
     ;;
 
+  restart)
+    echo "Restarting Sheep..."
+    if curl -sf -X POST "$DASHBOARD_URL/api/restart" > /dev/null 2>&1; then
+      echo "Done."
+    else
+      echo "Sheep is not running. Use 'sheep' to start."
+    fi
+    ;;
+
   "")
     cd "$SHEEP_DIR"
 
@@ -47,6 +56,7 @@ case "${1:-}" in
   *)
     echo "Usage: sheep           # install, build, and start"
     echo "       sheep shutdown  # shut down"
+    echo "       sheep restart   # restart"
     exit 1
     ;;
 
