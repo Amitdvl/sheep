@@ -230,8 +230,7 @@ function buildContainerArgs(
 
   // Pass through optional Groq API key for delegated fast/cheap tasks
   const groqKey =
-    process.env.GROQ_API_KEY ||
-    readEnvFile(['GROQ_API_KEY']).GROQ_API_KEY;
+    process.env.GROQ_API_KEY || readEnvFile(['GROQ_API_KEY']).GROQ_API_KEY;
   if (groqKey) {
     args.push('-e', `GROQ_API_KEY=${groqKey}`);
   }
@@ -516,11 +515,7 @@ export async function runContainerAgent(
         // Full input is only included at verbose level to avoid
         // persisting user conversation content on every non-zero exit.
         if (isVerbose) {
-          logLines.push(
-            `=== Input ===`,
-            JSON.stringify(input, null, 2),
-            ``,
-          );
+          logLines.push(`=== Input ===`, JSON.stringify(input, null, 2), ``);
         } else {
           logLines.push(
             `=== Input Summary ===`,

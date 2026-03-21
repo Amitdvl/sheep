@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sheep Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <h1>Sheep</h1>
+      <span class="badge" id="status-badge">connecting...</span>
+    </div>
+    <div class="header-right">
+      <span class="meta" id="uptime"></span>
+      <span class="meta" id="timezone"></span>
+    </div>
+  </header>
+
+  <nav>
+    <button class="tab active" data-tab="overview">Overview</button>
+    <button class="tab" data-tab="tasks">Scheduled Tasks</button>
+    <button class="tab" data-tab="memory">Memory</button>
+    <button class="tab" data-tab="conversations">Conversations</button>
+  </nav>
+
+  <!-- Overview -->
+  <section id="tab-overview" class="tab-content active">
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">Groups</div>
+        <div class="card-value" id="stat-groups">-</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Active Tasks</div>
+        <div class="card-value" id="stat-active-tasks">-</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Paused Tasks</div>
+        <div class="card-value" id="stat-paused-tasks">-</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Uptime</div>
+        <div class="card-value" id="stat-uptime">-</div>
+      </div>
+    </div>
+    <div class="section-title">Registered Groups</div>
+    <table id="groups-table">
+      <thead>
+        <tr><th>Name</th><th>Channel</th><th>Folder</th><th>Trigger</th><th>Main</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- Scheduled Tasks -->
+  <section id="tab-tasks" class="tab-content">
+    <div class="section-header">
+      <div class="section-title">Scheduled Tasks</div>
+    </div>
+    <table id="tasks-table">
+      <thead>
+        <tr><th>Prompt</th><th>Type</th><th>Schedule</th><th>Status</th><th>Next Run</th><th>Last Result</th><th>Actions</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="tasks-empty" class="empty-state" style="display:none">
+      No scheduled tasks. Sheep can create these via Discord — ask it to set up daily check-ins.
+    </div>
+  </section>
+
+  <!-- Memory -->
+  <section id="tab-memory" class="tab-content">
+    <div class="section-title">Memory Files</div>
+    <div id="memory-list" class="memory-grid"></div>
+    <div id="memory-editor" class="editor" style="display:none">
+      <div class="editor-header">
+        <span id="editor-filename"></span>
+        <div>
+          <button class="btn btn-sm" onclick="closeEditor()">Cancel</button>
+          <button class="btn btn-sm btn-primary" onclick="saveMemory()">Save</button>
+        </div>
+      </div>
+      <textarea id="editor-textarea"></textarea>
+    </div>
+  </section>
+
+  <!-- Conversations -->
+  <section id="tab-conversations" class="tab-content">
+    <div class="section-title">Recent Conversations</div>
+    <div id="conversations-list"></div>
+    <div id="conversations-empty" class="empty-state" style="display:none">
+      No conversations yet. Start chatting with Sheep on Discord.
+    </div>
+  </section>
+
+  <script src="/app.js"></script>
+</body>
+</html>

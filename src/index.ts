@@ -10,6 +10,7 @@ import {
   TRIGGER_PATTERN,
 } from './config.js';
 import { startCredentialProxy } from './credential-proxy.js';
+import { startDashboard } from './dashboard/server.js';
 import './channels/index.js';
 import {
   getChannelFactory,
@@ -476,6 +477,7 @@ async function main(): Promise<void> {
   logger.info('Database initialized');
   loadState();
   restoreRemoteControl();
+  startDashboard();
 
   // Start credential proxy (containers route API calls through this)
   const proxyServer = await startCredentialProxy(
