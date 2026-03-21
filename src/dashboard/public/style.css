@@ -205,6 +205,16 @@ td.prompt-cell {
 .btn-danger:hover { color: var(--red); border-color: var(--red); }
 .btn-sm { padding: 3px 8px; font-size: 11px; }
 
+/* Power controls */
+.power-controls { display: flex; gap: 6px; margin-left: 12px; }
+.btn-power { padding: 4px 12px; font-size: 11px; font-weight: 500; }
+.btn-restart { border-color: var(--yellow); color: var(--yellow); }
+.btn-restart:hover { background: rgba(251, 191, 36, 0.12); }
+.btn-shutdown { border-color: var(--red); color: var(--red); }
+.btn-shutdown:hover { background: rgba(248, 113, 113, 0.12); }
+.btn-power.confirming { animation: pulse 0.8s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
 .actions { display: flex; gap: 4px; }
 
 /* Memory Grid */

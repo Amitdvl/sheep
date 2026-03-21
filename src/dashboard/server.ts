@@ -194,6 +194,21 @@ async function apiMemoryUpdate(
   json(res, { ok: true });
 }
 
+function apiShutdown(_req: IncomingMessage, res: ServerResponse): void {
+  json(res, { ok: true, action: 'shutdown' });
+  logger.info('Shutdown requested via dashboard');
+  setTimeout(() => process.exit(0), 500);
+}
+
+function apiRestart(_req: IncomingMessage, res: ServerResponse): void {
+  json(res, { ok: true, action: 'restart' });
+  logger.info('Restart requested via dashboard');
+  // Exit with code 75 — the launchd/systemd service or wrapper script
+  // should detect this and restart the process.
+  // If running raw (npm run dev), this just stops — user restarts manually.
+  setTimeout(() => process.exit(75), 500);
+}
+
 // --- Router ---
 
 function matchRoute(
@@ -232,6 +247,8 @@ function matchRoute(
       pattern: /^\/api\/conversations(?:\/(?<folder>[^/]+))?$/,
       handler: apiConversations,
     },
+    { method: 'POST', pattern: /^\/api\/shutdown$/, handler: apiShutdown },
+    { method: 'POST', pattern: /^\/api\/restart$/, handler: apiRestart },
   ];
 
   for (const route of routes) {
