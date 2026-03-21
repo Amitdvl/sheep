@@ -3,7 +3,7 @@
 cd "$(dirname "$0")"
 
 while true; do
-  npm run dev
+  pnpm dev
   EXIT_CODE=$?
 
   if [ "$EXIT_CODE" -eq 75 ]; then
