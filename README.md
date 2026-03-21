@@ -1,4 +1,5 @@
 # Sheep
+<img width="1536" height="1024" alt="sheepit" src="https://github.com/user-attachments/assets/d7842622-fa12-4450-955e-a30445a01752" />
 
 Your sharp, no-nonsense AI mentor that lives in Discord. Built on [NanoClaw](https://github.com/qwibitai/nanoclaw).
 
