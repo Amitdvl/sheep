@@ -44,9 +44,21 @@ GROQ_API_KEY=gsk_...           # optional, for fast task delegation
 
 ```bash
 pnpm build                   # compile TypeScript
-./container/build.sh            # build agent container image
-pnpm dev                     # start Sheep (dev mode with hot reload)
+./container/build.sh         # build agent container image (first time only)
 ```
+
+### Start / Stop
+
+```bash
+# Start (from anywhere)
+cd ~/sheep && ./sheep.sh
+
+# Stop
+# — via dashboard: http://localhost:3800 → Shut Down button
+# — via terminal:  Ctrl+C
+```
+
+The `sheep.sh` launcher auto-restarts Sheep if you hit **Restart** in the dashboard. If you just use `pnpm dev`, restart will exit the process and you'll need to run the command again manually.
 
 ### Register Your Discord Channel
 
