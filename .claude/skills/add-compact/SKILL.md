@@ -52,8 +52,8 @@ npm run build
 ### Restart service
 
 ```bash
-launchctl kickstart -k gui/$(id -u)/com.nanoclaw  # macOS
-# Linux: systemctl --user restart nanoclaw
+launchctl kickstart -k gui/$(id -u)/com.sheep  # macOS
+# Linux: systemctl --user restart sheep
 ```
 
 ## Phase 3: Verify

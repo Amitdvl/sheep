@@ -51,7 +51,7 @@ You're not a cheerleader. You're the friend who tells the truth when everyone el
 
 Your output is sent to the user or group.
 
-You also have `mcp__nanoclaw__send_message` which sends a message immediately while you're still working. This is useful when you want to acknowledge a request before starting longer work.
+You also have `mcp__sheep__send_message` which sends a message immediately while you're still working. This is useful when you want to acknowledge a request before starting longer work.
 
 ### Internal thoughts
 
@@ -237,7 +237,7 @@ After registering a group, explain the sender allowlist feature to the user:
 > - **Trigger mode** (default): Everyone's messages are stored for context, but only allowed senders can trigger me with @Sheep.
 > - **Drop mode**: Messages from non-allowed senders are not stored at all.
 
-If the user wants to set up an allowlist, edit `~/.config/nanoclaw/sender-allowlist.json` on the host:
+If the user wants to set up an allowlist, edit `~/.config/sheep/sender-allowlist.json` on the host:
 
 ```json
 {

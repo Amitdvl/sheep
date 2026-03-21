@@ -1,6 +1,6 @@
 /**
  * Sheep Dashboard — lightweight web GUI for controlling the Discord bot.
- * Runs alongside the main NanoClaw process on a separate port.
+ * Runs alongside the main Sheep process on a separate port.
  */
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import fs from 'fs';

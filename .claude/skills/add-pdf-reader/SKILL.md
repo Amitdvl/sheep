@@ -62,8 +62,8 @@ npx vitest run src/channels/whatsapp.test.ts
 ### Restart service
 
 ```bash
-launchctl kickstart -k gui/$(id -u)/com.nanoclaw  # macOS
-# Linux: systemctl --user restart nanoclaw
+launchctl kickstart -k gui/$(id -u)/com.sheep  # macOS
+# Linux: systemctl --user restart sheep
 ```
 
 ## Phase 3: Verify
@@ -82,7 +82,7 @@ Ask the agent to read a PDF from a URL. It should use `pdf-reader fetch <url>`.
 ### Check logs if needed
 
 ```bash
-tail -f logs/nanoclaw.log | grep -i pdf
+tail -f logs/sheep.log | grep -i pdf
 ```
 
 Look for:

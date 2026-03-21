@@ -1,5 +1,5 @@
 /**
- * Container Runner for NanoClaw
+ * Container Runner for Sheep
  * Spawns agent execution in containers and handles IPC
  */
 import { ChildProcess, exec, spawn } from 'child_process';
@@ -31,8 +31,8 @@ import { validateAdditionalMounts } from './mount-security.js';
 import { RegisteredGroup } from './types.js';
 
 // Sentinel markers for robust output parsing (must match agent-runner)
-const OUTPUT_START_MARKER = '---NANOCLAW_OUTPUT_START---';
-const OUTPUT_END_MARKER = '---NANOCLAW_OUTPUT_END---';
+const OUTPUT_START_MARKER = '---SHEEP_OUTPUT_START---';
+const OUTPUT_END_MARKER = '---SHEEP_OUTPUT_END---';
 
 export interface ContainerInput {
   prompt: string;
@@ -285,7 +285,7 @@ export async function runContainerAgent(
 
   const mounts = buildVolumeMounts(group, input.isMain);
   const safeName = group.folder.replace(/[^a-zA-Z0-9-]/g, '-');
-  const containerName = `nanoclaw-${safeName}-${Date.now()}`;
+  const containerName = `sheep-${safeName}-${Date.now()}`;
   const containerArgs = buildContainerArgs(mounts, containerName);
 
   logger.debug(
@@ -684,6 +684,42 @@ export function writeTasksSnapshot(
 
   const tasksFile = path.join(groupIpcDir, 'current_tasks.json');
   fs.writeFileSync(tasksFile, JSON.stringify(filteredTasks, null, 2));
+}
+
+export interface MessagesSnapshotChat {
+  jid: string;
+  name: string;
+  channel: string;
+  last_message_time: string;
+}
+
+export interface MessagesSnapshotMessage {
+  chat_jid: string;
+  chat_name: string;
+  channel: string;
+  sender_name: string;
+  content: string;
+  timestamp: string;
+  is_from_me: number;
+}
+
+export function writeMessagesSnapshot(
+  groupFolder: string,
+  chats: MessagesSnapshotChat[],
+  messages: MessagesSnapshotMessage[],
+): void {
+  const groupIpcDir = resolveGroupIpcPath(groupFolder);
+  fs.mkdirSync(groupIpcDir, { recursive: true });
+
+  const snapshotFile = path.join(groupIpcDir, 'messages_snapshot.json');
+  fs.writeFileSync(
+    snapshotFile,
+    JSON.stringify(
+      { generatedAt: new Date().toISOString(), chats, messages },
+      null,
+      2,
+    ),
+  );
 }
 
 export interface AvailableGroup {

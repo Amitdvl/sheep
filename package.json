@@ -16,16 +16,18 @@
     "preinstall": "npx only-allow pnpm",
     "setup": "tsx setup/index.ts",
     "auth": "tsx src/whatsapp-auth.ts",
+    "auth:telegram-user": "tsx src/telegram-user-auth.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
     "better-sqlite3": "^11.8.1",
+    "cron-parser": "^5.5.0",
     "discord.js": "^14.18.0",
     "grammy": "^1.39.3",
-    "cron-parser": "^5.5.0",
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
+    "telegram": "^2.26.22",
     "yaml": "^2.8.2",
     "zod": "^4.3.6"
   },

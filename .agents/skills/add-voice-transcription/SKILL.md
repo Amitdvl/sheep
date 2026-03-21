@@ -104,8 +104,8 @@ The container reads environment from `data/env/env`, not `.env` directly.
 
 ```bash
 npm run build
-launchctl kickstart -k gui/$(id -u)/com.nanoclaw  # macOS
-# Linux: systemctl --user restart nanoclaw
+launchctl kickstart -k gui/$(id -u)/com.sheep  # macOS
+# Linux: systemctl --user restart sheep
 ```
 
 ## Phase 4: Verify
@@ -119,7 +119,7 @@ Tell the user:
 ### Check logs if needed
 
 ```bash
-tail -f logs/nanoclaw.log | grep -i voice
+tail -f logs/sheep.log | grep -i voice
 ```
 
 Look for:

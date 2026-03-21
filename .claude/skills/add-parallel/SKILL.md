@@ -233,15 +233,15 @@ Rebuild the main app and restart:
 
 ```bash
 npm run build
-launchctl kickstart -k gui/$(id -u)/com.nanoclaw  # macOS
-# Linux: systemctl --user restart nanoclaw
+launchctl kickstart -k gui/$(id -u)/com.sheep  # macOS
+# Linux: systemctl --user restart sheep
 ```
 
 Wait 3 seconds for service to start, then verify:
 ```bash
 sleep 3
 launchctl list | grep nanoclaw  # macOS
-# Linux: systemctl --user status nanoclaw
+# Linux: systemctl --user status sheep
 ```
 
 ### 8. Test Integration
@@ -257,7 +257,7 @@ Tell the user to test:
 
 Check logs to verify MCP servers loaded:
 ```bash
-tail -20 logs/nanoclaw.log
+tail -20 logs/sheep.log
 ```
 
 Look for: `Parallel AI MCP servers configured`
@@ -276,7 +276,7 @@ Look for: `Parallel AI MCP servers configured`
 
 **Task polling not working:**
 - Verify scheduled task was created: `sqlite3 store/messages.db "SELECT * FROM scheduled_tasks"`
-- Check task runs: `tail -f logs/nanoclaw.log | grep "scheduled task"`
+- Check task runs: `tail -f logs/sheep.log | grep "scheduled task"`
 - Ensure task prompt includes proper Parallel MCP tool names
 
 ## Uninstalling
@@ -287,4 +287,4 @@ To remove Parallel AI integration:
 2. Revert changes to container-runner.ts and agent-runner/src/index.ts
 3. Remove Web Research Tools section from groups/main/CLAUDE.md
 4. Rebuild: `./container/build.sh && npm run build`
-5. Restart: `launchctl kickstart -k gui/$(id -u)/com.nanoclaw` (macOS) or `systemctl --user restart nanoclaw` (Linux)
+5. Restart: `launchctl kickstart -k gui/$(id -u)/com.sheep` (macOS) or `systemctl --user restart sheep` (Linux)

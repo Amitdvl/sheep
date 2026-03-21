@@ -20,6 +20,7 @@ import {
   ContainerOutput,
   runContainerAgent,
   writeGroupsSnapshot,
+  writeMessagesSnapshot,
   writeTasksSnapshot,
 } from './container-runner.js';
 import {
@@ -33,6 +34,7 @@ import {
   getAllSessions,
   getAllTasks,
   getMessagesSince,
+  getRecentMessagesForSnapshot,
   getNewMessages,
   getRegisteredGroup,
   getRouterState,
@@ -59,6 +61,7 @@ import {
   shouldDropMessage,
 } from './sender-allowlist.js';
 import { startSchedulerLoop } from './task-scheduler.js';
+import { startTelegramUserClient } from './telegram-user-client.js';
 import { Channel, NewMessage, RegisteredGroup } from './types.js';
 import { logger } from './logger.js';
 
@@ -300,6 +303,17 @@ async function runAgent(
     new Set(Object.keys(registeredGroups)),
   );
 
+  // Write cross-channel messages snapshot so the agent can answer questions
+  // about data from any channel (Telegram, Discord, WhatsApp, etc.)
+  const snapshotChats = getAllChats().map((c) => ({
+    jid: c.jid,
+    name: c.name,
+    channel: c.channel,
+    last_message_time: c.last_message_time,
+  }));
+  const snapshotMessages = getRecentMessagesForSnapshot(30, 500);
+  writeMessagesSnapshot(group.folder, snapshotChats, snapshotMessages);
+
   // Wrap onOutput to track session ID from streamed results
   const wrappedOnOutput = onOutput
     ? async (output: ContainerOutput) => {
@@ -354,7 +368,7 @@ async function startMessageLoop(): Promise<void> {
   }
   messageLoopRunning = true;
 
-  logger.info(`NanoClaw running (trigger: @${ASSISTANT_NAME})`);
+  logger.info(`Sheep running (trigger: @${ASSISTANT_NAME})`);
 
   while (true) {
     try {
@@ -656,6 +670,10 @@ async function main(): Promise<void> {
     logger.fatal({ err }, 'Message loop crashed unexpectedly');
     process.exit(1);
   });
+
+  // Start Telegram user client (MTProto) for cross-channel message access.
+  // Runs alongside the bot to read all personal Telegram conversations.
+  startTelegramUserClient();
 }
 
 // Guard: only run when executed directly, not when imported by tests
@@ -666,7 +684,7 @@ const isDirectRun =
 
 if (isDirectRun) {
   main().catch((err) => {
-    logger.error({ err }, 'Failed to start NanoClaw');
+    logger.error({ err }, 'Failed to start Sheep');
     process.exit(1);
   });
 }

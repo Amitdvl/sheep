@@ -1,5 +1,5 @@
 /**
- * Container runtime abstraction for NanoClaw.
+ * Container runtime abstraction for Sheep.
  * All runtime-specific logic lives here so swapping runtimes means changing one file.
  */
 import { execSync } from 'child_process';
@@ -91,7 +91,7 @@ export function ensureContainerRuntimeRunning(): void {
       '║  2. Run: docker info                                           ║',
     );
     console.error(
-      '║  3. Restart NanoClaw                                           ║',
+      '║  3. Restart Sheep                                              ║',
     );
     console.error(
       '╚════════════════════════════════════════════════════════════════╝\n',
@@ -100,11 +100,11 @@ export function ensureContainerRuntimeRunning(): void {
   }
 }
 
-/** Kill orphaned NanoClaw containers from previous runs. */
+/** Kill orphaned Sheep containers from previous runs. */
 export function cleanupOrphans(): void {
   try {
     const output = execSync(
-      `${CONTAINER_RUNTIME_BIN} ps --filter name=nanoclaw- --format '{{.Names}}'`,
+      `${CONTAINER_RUNTIME_BIN} ps --filter name=sheep- --format '{{.Names}}'`,
       { stdio: ['pipe', 'pipe', 'pipe'], encoding: 'utf-8' },
     );
     const orphans = output.trim().split('\n').filter(Boolean);

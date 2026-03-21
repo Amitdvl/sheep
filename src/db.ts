@@ -338,6 +338,39 @@ export function getNewMessages(
   return { messages: rows, newTimestamp };
 }
 
+export interface MessageSnapshot {
+  chat_jid: string;
+  chat_name: string;
+  channel: string;
+  sender_name: string;
+  content: string;
+  timestamp: string;
+  is_from_me: number;
+}
+
+export function getRecentMessagesForSnapshot(
+  days: number = 7,
+  limitPerChat: number = 100,
+): MessageSnapshot[] {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  return db
+    .prepare(
+      `
+      SELECT m.chat_jid, COALESCE(c.name, m.chat_jid) as chat_name,
+             COALESCE(c.channel, 'unknown') as channel,
+             m.sender_name, m.content, m.timestamp, m.is_from_me
+      FROM messages m
+      LEFT JOIN chats c ON m.chat_jid = c.jid
+      WHERE m.timestamp > ?
+        AND m.is_bot_message = 0
+        AND m.content != '' AND m.content IS NOT NULL
+      ORDER BY m.timestamp DESC
+      LIMIT ?
+    `,
+    )
+    .all(since, limitPerChat) as MessageSnapshot[];
+}
+
 export function getMessagesSince(
   chatJid: string,
   sinceTimestamp: string,

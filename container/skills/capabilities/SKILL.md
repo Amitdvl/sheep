@@ -1,11 +1,11 @@
 ---
 name: capabilities
-description: Show what this NanoClaw instance can do — installed skills, available tools, and system info. Read-only. Use when the user asks what the bot can do, what's installed, or runs /capabilities.
+description: Show what this Sheep instance can do — installed skills, available tools, and system info. Read-only. Use when the user asks what the bot can do, what's installed, or runs /capabilities.
 ---
 
 # /capabilities — System Capabilities Report
 
-Generate a structured read-only report of what this NanoClaw instance can do.
+Generate a structured read-only report of what this Sheep instance can do.
 
 **Main-channel check:** Only the main channel has `/workspace/project` mounted. Run:
 
@@ -39,11 +39,12 @@ Read the allowed tools from your SDK configuration. You always have access to:
 - **Web:** WebSearch, WebFetch
 - **Orchestration:** Task, TaskOutput, TaskStop, TeamCreate, TeamDelete, SendMessage
 - **Other:** TodoWrite, ToolSearch, Skill, NotebookEdit
-- **MCP:** mcp__nanoclaw__* (messaging, tasks, group management)
+- **MCP:** mcp__sheep__* (messaging, tasks, group management)
+- **CLI:** `node /tmp/dist/sheep-messages.js` (cross-channel message history)
 
 ### 3. MCP server tools
 
-The NanoClaw MCP server exposes these tools (via `mcp__nanoclaw__*` prefix):
+The Sheep MCP server exposes these tools (via `mcp__sheep__*` prefix):
 - `send_message` — send a message to the user/group
 - `schedule_task` — schedule a recurring or one-time task
 - `list_tasks` — list scheduled tasks
@@ -59,6 +60,7 @@ Check for executable tools in the container:
 
 ```bash
 which agent-browser 2>/dev/null && echo "agent-browser: available" || echo "agent-browser: not found"
+test -f /tmp/dist/sheep-messages.js && echo "sheep-messages: available" || echo "sheep-messages: not found"
 ```
 
 ### 5. Group info
@@ -73,7 +75,7 @@ ls /workspace/extra/ 2>/dev/null && echo "Extra mounts: $(ls /workspace/extra/ 2
 Present the report as a clean, readable message. Example:
 
 ```
-📋 *NanoClaw Capabilities*
+📋 *Sheep Capabilities*
 
 *Installed Skills:*
 • /agent-browser — Browse the web, fill forms, extract data

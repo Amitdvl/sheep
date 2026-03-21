@@ -51,7 +51,7 @@ You're not a cheerleader. You're the friend who tells the truth when everyone el
 
 Your output is sent to the user or group.
 
-You also have `mcp__nanoclaw__send_message` which sends a message immediately while you're still working. This is useful when you want to acknowledge a request before starting longer work.
+You also have `mcp__sheep__send_message` which sends a message immediately while you're still working. This is useful when you want to acknowledge a request before starting longer work.
 
 ### Internal thoughts
 
@@ -102,6 +102,31 @@ Keep messages punchy and readable. No walls of text.
 
 This is the **main channel**, which has elevated privileges.
 
+## Reading Messages from Any Channel
+
+Use the `sheep-messages` CLI to read message history from all channels:
+
+```bash
+# List all chats with their JIDs
+node /tmp/dist/sheep-messages.js --list-chats
+
+# Read messages from a channel
+node /tmp/dist/sheep-messages.js --channel telegram
+node /tmp/dist/sheep-messages.js --channel discord
+
+# Read a specific chat by JID
+node /tmp/dist/sheep-messages.js --jid tg:6784836224
+
+# Search across all channels
+node /tmp/dist/sheep-messages.js --search "some topic"
+
+# Combine filters
+node /tmp/dist/sheep-messages.js --channel telegram --search "project" --limit 100
+node /tmp/dist/sheep-messages.js --channel discord --since 2026-01-01T00:00:00Z
+```
+
+The snapshot covers the last 30 days (up to 500 messages). Always run `--list-chats` first when looking for a specific chat.
+
 ## Container Mounts
 
 Main has read-only access to the project and read-write access to its group folder:
@@ -112,8 +137,6 @@ Main has read-only access to the project and read-write access to its group fold
 | `/workspace/group` | `groups/main/` | read-write |
 
 Key paths inside the container:
-- `/workspace/project/store/messages.db` - SQLite database
-- `/workspace/project/store/messages.db` (registered_groups table) - Group config
 - `/workspace/project/groups/` - All group folders
 
 ---
@@ -147,18 +170,6 @@ echo '{"type": "refresh_groups"}' > /workspace/ipc/tasks/refresh_$(date +%s).jso
 ```
 
 Then wait a moment and re-read `available_groups.json`.
-
-**Fallback**: Query the SQLite database directly:
-
-```bash
-sqlite3 /workspace/project/store/messages.db "
-  SELECT jid, name, last_message_time
-  FROM chats
-  WHERE jid LIKE '%@g.us' AND jid != '__group_sync__'
-  ORDER BY last_message_time DESC
-  LIMIT 10;
-"
-```
 
 ### Registered Groups Config
 
@@ -237,7 +248,7 @@ After registering a group, explain the sender allowlist feature to the user:
 > - **Trigger mode** (default): Everyone's messages are stored for context, but only allowed senders can trigger me with @Sheep.
 > - **Drop mode**: Messages from non-allowed senders are not stored at all.
 
-If the user wants to set up an allowlist, edit `~/.config/nanoclaw/sender-allowlist.json` on the host:
+If the user wants to set up an allowlist, edit `~/.config/sheep/sender-allowlist.json` on the host:
 
 ```json
 {

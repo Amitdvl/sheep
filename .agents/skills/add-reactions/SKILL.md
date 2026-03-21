@@ -76,12 +76,12 @@ npm run build
 
 Linux:
 ```bash
-systemctl --user restart nanoclaw
+systemctl --user restart sheep
 ```
 
 macOS:
 ```bash
-launchctl kickstart -k gui/$(id -u)/com.nanoclaw
+launchctl kickstart -k gui/$(id -u)/com.sheep
 ```
 
 ### Test receiving reactions
