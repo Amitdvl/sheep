@@ -52,6 +52,7 @@ pnpm build                   # compile TypeScript
 ```bash
 sheep            # install deps, build, and start (from anywhere)
 sheep shutdown   # shut down
+sheep restart    # restart (also available via dashboard)
 ```
 
 The `sheep` command is a global CLI installed at `~/.local/bin/sheep`. It skips install/build if already up to date, so subsequent starts are instant. The dashboard **Restart** button also works seamlessly — `sheep` auto-relaunches after a restart.
