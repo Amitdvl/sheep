@@ -230,6 +230,56 @@ async function loadConversations() {
 window.taskAction = taskAction;
 window.taskDelete = taskDelete;
 
+// --- Power Controls ---
+let shutdownConfirm = false;
+let restartConfirm = false;
+
+window.shutdownSheep = async function() {
+  const btn = document.querySelector('.btn-shutdown');
+  if (!shutdownConfirm) {
+    shutdownConfirm = true;
+    btn.textContent = 'Confirm?';
+    btn.classList.add('confirming');
+    setTimeout(() => { shutdownConfirm = false; btn.textContent = 'Shut Down'; btn.classList.remove('confirming'); }, 3000);
+    return;
+  }
+  btn.textContent = 'Shutting down...';
+  btn.classList.remove('confirming');
+  await api('/api/shutdown', { method: 'POST' });
+  $('#status-badge').textContent = 'offline';
+  $('#status-badge').className = 'badge';
+  btn.textContent = 'Offline';
+  btn.disabled = true;
+};
+
+window.restartSheep = async function() {
+  const btn = document.querySelector('.btn-restart');
+  if (!restartConfirm) {
+    restartConfirm = true;
+    btn.textContent = 'Confirm?';
+    btn.classList.add('confirming');
+    setTimeout(() => { restartConfirm = false; btn.textContent = 'Restart'; btn.classList.remove('confirming'); }, 3000);
+    return;
+  }
+  btn.textContent = 'Restarting...';
+  btn.classList.remove('confirming');
+  await api('/api/restart', { method: 'POST' });
+  $('#status-badge').textContent = 'restarting...';
+  $('#status-badge').className = 'badge';
+  // Poll until back up
+  const poll = setInterval(async () => {
+    try {
+      const r = await fetch('/api/status');
+      if (r.ok) {
+        clearInterval(poll);
+        btn.textContent = 'Restart';
+        restartConfirm = false;
+        loadStatus();
+      }
+    } catch {}
+  }, 2000);
+};
+
 // --- Init ---
 loadStatus();
 
