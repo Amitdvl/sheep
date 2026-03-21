@@ -50,15 +50,11 @@ pnpm build                   # compile TypeScript
 ### Start / Stop
 
 ```bash
-# Start (from anywhere)
-cd ~/sheep && ./sheep.sh
-
-# Stop
-# — via dashboard: http://localhost:3800 → Shut Down button
-# — via terminal:  Ctrl+C
+sheep            # install deps, build, and start (from anywhere)
+sheep shutdown   # shut down
 ```
 
-The `sheep.sh` launcher auto-restarts Sheep if you hit **Restart** in the dashboard. If you just use `pnpm dev`, restart will exit the process and you'll need to run the command again manually.
+The `sheep` command is a global CLI installed at `~/.local/bin/sheep`. It skips install/build if already up to date, so subsequent starts are instant. The dashboard **Restart** button also works seamlessly — `sheep` auto-relaunches after a restart.
 
 ### Register Your Discord Channel
 

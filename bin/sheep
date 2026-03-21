@@ -1,0 +1,53 @@
+#!/bin/bash
+# Sheep CLI — start, stop, and manage your mentor agent
+
+SHEEP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DASHBOARD_URL="http://localhost:3800"
+
+case "${1:-}" in
+
+  shutdown)
+    echo "Shutting down Sheep..."
+    if curl -sf -X POST "$DASHBOARD_URL/api/shutdown" > /dev/null 2>&1; then
+      echo "Done."
+    else
+      # Dashboard not reachable — kill the process directly
+      if pkill -f "tsx src/index.ts" 2>/dev/null || pkill -f "node dist/index.js" 2>/dev/null; then
+        echo "Done."
+      else
+        echo "Sheep is not running."
+      fi
+    fi
+    ;;
+
+  "")
+    cd "$SHEEP_DIR"
+
+    # Install deps if node_modules is missing or pnpm-lock.yaml is newer
+    if [ ! -d node_modules ] || [ pnpm-lock.yaml -nt node_modules ]; then
+      echo "Installing dependencies..."
+      pnpm install --silent
+    fi
+
+    # Build if dist/ is missing or source is newer
+    if [ ! -d dist ] || find src -name "*.ts" -newer dist/index.js 2>/dev/null | grep -q .; then
+      echo "Building..."
+      pnpm build
+    fi
+
+    # Run with auto-restart support
+    while true; do
+      pnpm dev
+      EXIT_CODE=$?
+      [ "$EXIT_CODE" -eq 75 ] && { echo "Restarting..."; sleep 1; continue; }
+      break
+    done
+    ;;
+
+  *)
+    echo "Usage: sheep           # install, build, and start"
+    echo "       sheep shutdown  # shut down"
+    exit 1
+    ;;
+
+esac
