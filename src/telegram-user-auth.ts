@@ -13,9 +13,12 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function ask(question: string): Promise<string> {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise(resolve => {
-    rl.question(question, answer => {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
       rl.close();
       resolve(answer.trim());
     });
@@ -52,17 +55,15 @@ if (!apiHash) {
 const { TelegramClient } = await import('telegram');
 const { StringSession } = await import('telegram/sessions/index.js');
 
-const client = new TelegramClient(
-  new StringSession(''),
-  apiId,
-  apiHash,
-  { connectionRetries: 5 },
-);
+const client = new TelegramClient(new StringSession(''), apiId, apiHash, {
+  connectionRetries: 5,
+});
 
 console.log('\nConnecting to Telegram...\n');
 
 await client.start({
-  phoneNumber: async () => ask('Your phone number (with country code, e.g. +972501234567): '),
+  phoneNumber: async () =>
+    ask('Your phone number (with country code, e.g. +972501234567): '),
   password: async () => ask('2FA password (press Enter if none): '),
   phoneCode: async () => ask('OTP code sent to your Telegram: '),
   onError: (err) => console.error('Auth error:', err.message),
@@ -73,7 +74,9 @@ console.log('\n✓ Authentication successful!\n');
 
 // Update .env file
 const envPath = path.resolve(__dirname, '..', '.env');
-let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf-8') : '';
+let envContent = fs.existsSync(envPath)
+  ? fs.readFileSync(envPath, 'utf-8')
+  : '';
 
 // Remove existing entries
 envContent = envContent
@@ -93,7 +96,9 @@ console.log('Saved to .env:');
 console.log(`  TELEGRAM_API_ID=${apiId}`);
 console.log('  TELEGRAM_API_HASH=****');
 console.log('  TELEGRAM_USER_SESSION=<session string>');
-console.log('\nRestart Sheep: kill $(pgrep -f "dist/index.js") && node dist/index.js >> logs/sheep.log 2>&1 &\n');
+console.log(
+  '\nRestart Sheep: kill $(pgrep -f "dist/index.js") && node dist/index.js >> logs/sheep.log 2>&1 &\n',
+);
 
 await client.disconnect();
 process.exit(0);
