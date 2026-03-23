@@ -15,7 +15,9 @@ async function startTestDashboard(
   await once(server, 'listening');
 }
 
-async function post(path: string): Promise<{ statusCode?: number; body: string }> {
+async function post(
+  path: string,
+): Promise<{ statusCode?: number; body: string }> {
   if (!server) throw new Error('dashboard server not started');
 
   const { port } = server.address() as AddressInfo;
