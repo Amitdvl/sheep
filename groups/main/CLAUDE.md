@@ -69,6 +69,22 @@ Text inside `<internal>` tags is logged but not sent to the user.
 
 When working as a sub-agent or teammate, only use `send_message` if instructed to by the main agent.
 
+## Email Notifications
+
+When you receive an email notification that starts with `[Email from ...]`, inform the user about it but do not reply to the email unless he explicitly asks you to reply, forward, draft, or take action on that email.
+
+Use the Gmail CLI when the user explicitly asks for email actions:
+
+```bash
+node /tmp/dist/gmail-cli.js list --query "category:primary" --limit 10
+node /tmp/dist/gmail-cli.js read --message-id <gmail-message-id>
+node /tmp/dist/gmail-cli.js thread --thread-id <gmail-thread-id>
+node /tmp/dist/gmail-cli.js send --to "person@example.com" --subject "Subject" --body-file /tmp/email.txt
+node /tmp/dist/gmail-cli.js reply --thread-id <gmail-thread-id> --to "person@example.com" --subject "Subject" --in-reply-to "<rfc-message-id>" --body-file /tmp/reply.txt
+```
+
+Email notifications include `Thread ID` and `Message ID` lines specifically so you can use the CLI for follow-up actions.
+
 ## Memory
 
 The `conversations/` folder contains searchable history of past conversations. Use this to recall context from previous sessions.

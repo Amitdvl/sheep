@@ -2,7 +2,7 @@
  * One-time Telegram user account authentication.
  * Saves session string to .env so the user client can connect on startup.
  *
- * Usage: pnpm auth:telegram-user
+ * Usage: npm run auth:telegram-user or pnpm auth:telegram-user
  */
 
 import readline from 'readline';

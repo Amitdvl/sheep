@@ -15,22 +15,65 @@ Sheep tracks your projects, holds you accountable, and calls out procrastination
 
 ## Quick Start
 
-### Prerequisites
+### Recommended Install
 
-- Node.js >= 20
-- Docker Desktop running
+The installer handles the machine setup for you:
+
+- macOS / Linux: installs or verifies Homebrew/system packages, Node.js, Docker, Sheep, and the `sheep` CLI
+- Windows: installs Docker Desktop, WSL2 + Ubuntu, then installs Sheep inside WSL and adds a Windows `sheep` wrapper
+
+Run one of these:
+
+macOS / Linux:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Amitdvl/sheep/main/scripts/install.sh | bash
+```
+
+Windows PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/Amitdvl/sheep/main/scripts/install.ps1 | iex
+```
+
+Already cloned:
+
+```bash
+sheep install
+```
+
+After the installer finishes:
+
+1. Edit `.env`
+2. Add your Anthropic API key
+3. Add a Telegram bot token, and optionally a Discord bot token
+4. Run `sheep`
+
+Windows note: Sheep runs inside WSL2. The installer sets that up for you, but Docker Desktop still needs to complete its own first-run flow the first time.
+
+### Required Credentials
+
 - Anthropic API key
 - Telegram bot token ([create one](https://t.me/BotFather))
 - Discord bot token ([create one](https://discord.com/developers/applications)) if you also want Discord
 
-### Setup
+### Manual Developer Setup
+
+If you want to install everything yourself instead of using the installer:
+
+- Node.js >= 20
+- Docker Desktop running on macOS/Windows, or Docker Engine on Linux
+
+Clone and install:
 
 ```bash
 git clone https://github.com/Amitdvl/sheep.git
 cd sheep
-pnpm install
+npm install
 cp .env.example .env
 ```
+
+`pnpm install` also works if you prefer pnpm.
 
 Edit `.env`:
 
@@ -42,22 +85,23 @@ DISCORD_BOT_TOKEN=your-discord-bot-token   # optional
 GROQ_API_KEY=gsk_...           # optional, for fast task delegation
 ```
 
-### Build & Run
+Build the app and container image:
 
 ```bash
-pnpm build                   # compile TypeScript
+npm run build               # compile TypeScript
 ./container/build.sh         # build agent container image (first time only)
 ```
 
-### Start / Stop
+Run it:
 
 ```bash
-sheep            # install deps, build, and start (from anywhere)
+sheep install    # recommended if you want the CLI to handle setup/build for you
+sheep            # start Sheep
 sheep shutdown   # shut down
 sheep restart    # restart (also available via dashboard)
 ```
 
-The `sheep` command is a global CLI installed at `~/.local/bin/sheep`. It skips install/build if already up to date, so subsequent starts are instant. The dashboard **Restart** button also works seamlessly — `sheep` auto-relaunches after a restart.
+The `sheep` command is installed at `~/.local/bin/sheep` on macOS/Linux. On Windows, the installer creates a `sheep.cmd` wrapper that forwards to the WSL install. Once installed, `sheep` skips dependency and build work when everything is already up to date.
 
 ### Log In Through Telegram And Chat With The Bot
 

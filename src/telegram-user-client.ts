@@ -65,7 +65,7 @@ export function startTelegramUserClient(): void {
 
   if (!apiIdStr || !apiHash || !sessionStr) {
     logger.debug(
-      'Telegram user client: credentials not set, skipping (run pnpm auth:telegram-user to enable)',
+      'Telegram user client: credentials not set, skipping (run npm run auth:telegram-user or pnpm auth:telegram-user to enable)',
     );
     return;
   }

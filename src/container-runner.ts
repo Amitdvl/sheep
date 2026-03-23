@@ -4,6 +4,7 @@
  */
 import { ChildProcess, exec, spawn } from 'child_process';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 
 import {
@@ -12,6 +13,7 @@ import {
   CONTAINER_TIMEOUT,
   CREDENTIAL_PROXY_PORT,
   DATA_DIR,
+  GMAIL_CONFIG_DIR,
   GROUPS_DIR,
   IDLE_TIMEOUT,
   TIMEZONE,
@@ -199,6 +201,14 @@ function buildVolumeMounts(
     containerPath: '/app/src',
     readonly: false,
   });
+
+  if (fs.existsSync(GMAIL_CONFIG_DIR)) {
+    mounts.push({
+      hostPath: GMAIL_CONFIG_DIR,
+      containerPath: '/home/node/.config/sheep/gmail',
+      readonly: false,
+    });
+  }
 
   // Additional mounts validated against external allowlist (tamper-proof from containers)
   if (group.containerConfig?.additionalMounts) {

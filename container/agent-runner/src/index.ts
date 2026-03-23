@@ -407,7 +407,7 @@ async function runQuery(
         'TeamCreate', 'TeamDelete', 'SendMessage',
         'TodoWrite', 'ToolSearch', 'Skill',
         'NotebookEdit',
-        'mcp__sheep__*'
+        'mcp__sheep__*',
       ],
       model: 'claude-sonnet-4-6',
       env: sdkEnv,

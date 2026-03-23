@@ -11,7 +11,64 @@ done
 SHEEP_DIR="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
 DASHBOARD_URL="http://localhost:3800"
 
+pick_package_manager() {
+  PREFERRED=""
+
+  if [ -n "${SHEEP_PACKAGE_MANAGER:-}" ]; then
+    PREFERRED="$SHEEP_PACKAGE_MANAGER"
+  elif [ -f package-lock.json ] && { [ ! -f pnpm-lock.yaml ] || [ package-lock.json -nt pnpm-lock.yaml ]; }; then
+    PREFERRED="npm"
+  elif [ -f pnpm-lock.yaml ]; then
+    PREFERRED="pnpm"
+  fi
+
+  for CANDIDATE in "$PREFERRED" pnpm npm; do
+    [ -z "$CANDIDATE" ] && continue
+    if command -v "$CANDIDATE" >/dev/null 2>&1; then
+      echo "$CANDIDATE"
+      return 0
+    fi
+  done
+
+  echo ""
+}
+
+active_lockfile() {
+  if [ "$PACKAGE_MANAGER" = "pnpm" ]; then
+    echo "pnpm-lock.yaml"
+  else
+    echo "package-lock.json"
+  fi
+}
+
+install_dependencies() {
+  if [ "$PACKAGE_MANAGER" = "pnpm" ]; then
+    pnpm install --silent
+  else
+    npm install --silent
+  fi
+}
+
+run_script() {
+  if [ "$PACKAGE_MANAGER" = "pnpm" ]; then
+    pnpm "$1"
+  else
+    npm run "$1"
+  fi
+}
+
+lockfile_is_newer() {
+  LOCKFILE="$(active_lockfile)"
+  [ -f "$LOCKFILE" ] && [ "$LOCKFILE" -nt node_modules ] && return 0
+  return 1
+}
+
 case "${1:-}" in
+
+  install)
+    cd "$SHEEP_DIR"
+    bash "$SHEEP_DIR/scripts/install.sh"
+    ;;
 
   shutdown)
     echo "Shutting down Sheep..."
@@ -38,22 +95,28 @@ case "${1:-}" in
 
   "")
     cd "$SHEEP_DIR"
+    PACKAGE_MANAGER="$(pick_package_manager)"
 
-    # Install deps if node_modules is missing or pnpm-lock.yaml is newer
-    if [ ! -d node_modules ] || [ pnpm-lock.yaml -nt node_modules ]; then
+    if [ -z "$PACKAGE_MANAGER" ]; then
+      echo "Neither pnpm nor npm is installed."
+      exit 1
+    fi
+
+    # Install deps if node_modules is missing or a lockfile is newer
+    if [ ! -d node_modules ] || lockfile_is_newer; then
       echo "Installing dependencies..."
-      pnpm install --silent
+      install_dependencies
     fi
 
     # Build if dist/ is missing or source is newer
     if [ ! -d dist ] || find src -name "*.ts" -newer dist/index.js 2>/dev/null | grep -q .; then
       echo "Building..."
-      pnpm build
+      run_script build
     fi
 
     # Run with auto-restart support
     while true; do
-      pnpm dev
+      run_script dev
       EXIT_CODE=$?
       [ "$EXIT_CODE" -eq 75 ] && { echo "Restarting..."; sleep 1; continue; }
       break
@@ -61,7 +124,8 @@ case "${1:-}" in
     ;;
 
   *)
-    echo "Usage: sheep           # install, build, and start"
+    echo "Usage: sheep install   # install Docker/deps, build, and wire the CLI"
+    echo "       sheep           # install deps if needed, build, and start"
     echo "       sheep shutdown  # shut down"
     echo "       sheep restart   # restart"
     exit 1
