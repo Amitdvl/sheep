@@ -79,7 +79,9 @@ async function main(): Promise<void> {
   const { client_id, client_secret, redirect_uris } = clientConfig;
   const redirectUri = redirect_uris?.[0];
   if (!client_id || !client_secret || !redirectUri) {
-    fail('OAuth client JSON is missing client_id, client_secret, or redirect_uris[0]');
+    fail(
+      'OAuth client JSON is missing client_id, client_secret, or redirect_uris[0]',
+    );
   }
 
   const auth = new google.auth.OAuth2(client_id, client_secret, redirectUri);
@@ -98,7 +100,9 @@ async function main(): Promise<void> {
 
     console.log(`Gmail OAuth client stored at ${storedKeysPath}`);
     console.log('');
-    console.log('Open this URL, approve access, then paste the full redirect URL back to me:');
+    console.log(
+      'Open this URL, approve access, then paste the full redirect URL back to me:',
+    );
     console.log(authUrl);
     console.log('');
 

@@ -63,6 +63,25 @@ lockfile_is_newer() {
   return 1
 }
 
+stop_launchd_service() {
+  command -v launchctl >/dev/null 2>&1 || return 1
+
+  PLIST="$HOME/Library/LaunchAgents/com.sheep.plist"
+  launchctl list | grep -q "com.sheep" || return 1
+
+  if [ -f "$PLIST" ] && launchctl unload "$PLIST" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  return 1
+}
+
+stop_systemd_service() {
+  command -v systemctl >/dev/null 2>&1 || return 1
+  systemctl --user is-active --quiet sheep || return 1
+  systemctl --user stop sheep >/dev/null 2>&1
+}
+
 case "${1:-}" in
 
   install)
@@ -72,11 +91,13 @@ case "${1:-}" in
 
   shutdown)
     echo "Shutting down Sheep..."
-    if curl -sf -X POST "$DASHBOARD_URL/api/shutdown" > /dev/null 2>&1; then
+    if stop_launchd_service || stop_systemd_service; then
+      echo "Done."
+    elif curl -sf -X POST "$DASHBOARD_URL/api/shutdown" > /dev/null 2>&1; then
       echo "Done."
     else
       # Dashboard not reachable — kill the process directly
-      if pkill -f "tsx src/index.ts" 2>/dev/null || pkill -f "node dist/index.js" 2>/dev/null; then
+      if pkill -f "$SHEEP_DIR/src/index.ts" 2>/dev/null || pkill -f "$SHEEP_DIR/dist/index.js" 2>/dev/null; then
         echo "Done."
       else
         echo "Sheep is not running."

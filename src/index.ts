@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { Server } from 'http';
 
 import {
   ASSISTANT_NAME,
@@ -491,24 +492,77 @@ async function main(): Promise<void> {
   logger.info('Database initialized');
   loadState();
   restoreRemoteControl();
-  startDashboard();
+
+  let shutdownPromise: Promise<void> | null = null;
+
+  const closeServer = (server: Server, name: string): Promise<void> =>
+    new Promise((resolve) => {
+      if (!server.listening) {
+        resolve();
+        return;
+      }
+
+      server.close((err) => {
+        if (err) logger.warn({ err, server: name }, 'Failed to close server');
+        resolve();
+      });
+    });
 
   // Start credential proxy (containers route API calls through this)
   const proxyServer = await startCredentialProxy(
     CREDENTIAL_PROXY_PORT,
     PROXY_BIND_HOST,
   );
+  const dashboardServer = startDashboard({
+    onShutdown: () => shutdown('dashboard'),
+    onRestart: () => shutdown('dashboard-restart', 75),
+  });
 
-  // Graceful shutdown handlers
-  const shutdown = async (signal: string) => {
-    logger.info({ signal }, 'Shutdown signal received');
-    proxyServer.close();
-    await queue.shutdown(10000);
-    for (const ch of channels) await ch.disconnect();
-    process.exit(0);
+  // Funnel every shutdown path through one idempotent cleanup sequence.
+  const shutdown = async (signal: string, exitCode = 0): Promise<void> => {
+    if (shutdownPromise) {
+      logger.info({ signal, exitCode }, 'Shutdown already in progress');
+      return shutdownPromise;
+    }
+
+    shutdownPromise = (async () => {
+      logger.info({ signal, exitCode }, 'Shutdown signal received');
+
+      try {
+        await Promise.all([
+          closeServer(dashboardServer, 'dashboard'),
+          closeServer(proxyServer, 'credential-proxy'),
+        ]);
+
+        await queue.shutdown(10000);
+
+        const disconnectResults = await Promise.allSettled(
+          channels.map((channel) => channel.disconnect()),
+        );
+        disconnectResults.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            logger.warn(
+              { err: result.reason, channelIndex: index },
+              'Channel disconnect failed during shutdown',
+            );
+          }
+        });
+
+        process.exit(exitCode);
+      } catch (err) {
+        logger.error({ err, signal, exitCode }, 'Shutdown failed');
+        process.exit(1);
+      }
+    })();
+
+    return shutdownPromise;
   };
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
-  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => {
+    void shutdown('SIGTERM');
+  });
+  process.on('SIGINT', () => {
+    void shutdown('SIGINT');
+  });
 
   // Handle /remote-control and /remote-control-end commands
   async function handleRemoteControl(

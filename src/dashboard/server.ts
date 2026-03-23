@@ -2,7 +2,7 @@
  * Sheep Dashboard — lightweight web GUI for controlling the Discord bot.
  * Runs alongside the main Sheep process on a separate port.
  */
-import { createServer, IncomingMessage, ServerResponse } from 'http';
+import { createServer, IncomingMessage, Server, ServerResponse } from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -38,6 +38,15 @@ interface RouteHandler {
     res: ServerResponse,
     params: Record<string, string>,
   ): Promise<void> | void;
+}
+
+interface DashboardLifecycleHandlers {
+  onShutdown?: () => Promise<void> | void;
+  onRestart?: () => Promise<void> | void;
+}
+
+interface StartDashboardOptions extends DashboardLifecycleHandlers {
+  port?: number;
 }
 
 const MIME_TYPES: Record<string, string> = {
@@ -194,19 +203,46 @@ async function apiMemoryUpdate(
   json(res, { ok: true });
 }
 
-function apiShutdown(_req: IncomingMessage, res: ServerResponse): void {
-  json(res, { ok: true, action: 'shutdown' });
-  logger.info('Shutdown requested via dashboard');
-  setTimeout(() => process.exit(0), 500);
+function triggerLifecycleAction(
+  action: 'shutdown' | 'restart',
+  handler?: () => Promise<void> | void,
+): void {
+  const fallbackExitCode = action === 'restart' ? 75 : 0;
+
+  setImmediate(() => {
+    Promise.resolve()
+      .then(() => {
+        if (handler) return handler();
+        process.exit(fallbackExitCode);
+      })
+      .catch((err) => {
+        logger.error({ err, action }, 'Dashboard lifecycle hook failed');
+        process.exit(1);
+      });
+  });
 }
 
-function apiRestart(_req: IncomingMessage, res: ServerResponse): void {
+function apiShutdown(
+  _req: IncomingMessage,
+  res: ServerResponse,
+  onShutdown?: () => Promise<void> | void,
+): void {
+  json(res, { ok: true, action: 'shutdown' });
+  logger.info('Shutdown requested via dashboard');
+  triggerLifecycleAction('shutdown', onShutdown);
+}
+
+function apiRestart(
+  _req: IncomingMessage,
+  res: ServerResponse,
+  onRestart?: () => Promise<void> | void,
+): void {
   json(res, { ok: true, action: 'restart' });
   logger.info('Restart requested via dashboard');
   // Exit with code 75 — the launchd/systemd service or wrapper script
   // should detect this and restart the process.
   // If running raw (npm run dev), this just stops — user restarts manually.
-  setTimeout(() => process.exit(75), 500);
+  triggerLifecycleAction('restart', onRestart);
 }
 
 // --- Router ---
@@ -214,6 +250,7 @@ function apiRestart(_req: IncomingMessage, res: ServerResponse): void {
 function matchRoute(
   method: string,
   url: string,
+  lifecycleHandlers: DashboardLifecycleHandlers,
 ): { handler: RouteHandler; params: Record<string, string> } | null {
   const routes: Array<{
     method: string;
@@ -247,8 +284,17 @@ function matchRoute(
       pattern: /^\/api\/conversations(?:\/(?<folder>[^/]+))?$/,
       handler: apiConversations,
     },
-    { method: 'POST', pattern: /^\/api\/shutdown$/, handler: apiShutdown },
-    { method: 'POST', pattern: /^\/api\/restart$/, handler: apiRestart },
+    {
+      method: 'POST',
+      pattern: /^\/api\/shutdown$/,
+      handler: (req, res) =>
+        apiShutdown(req, res, lifecycleHandlers.onShutdown),
+    },
+    {
+      method: 'POST',
+      pattern: /^\/api\/restart$/,
+      handler: (req, res) => apiRestart(req, res, lifecycleHandlers.onRestart),
+    },
   ];
 
   for (const route of routes) {
@@ -289,7 +335,7 @@ function serveStatic(req: IncomingMessage, res: ServerResponse): boolean {
 
 // --- Server ---
 
-export function startDashboard(): void {
+export function startDashboard(options: StartDashboardOptions = {}): Server {
   const server = createServer(async (req, res) => {
     const url = req.url || '/';
     const method = req.method || 'GET';
@@ -309,7 +355,7 @@ export function startDashboard(): void {
 
     // API routes
     const apiPath = url.split('?')[0];
-    const route = matchRoute(method, apiPath);
+    const route = matchRoute(method, apiPath, options);
     if (route) {
       try {
         await route.handler(req, res, route.params);
@@ -337,7 +383,10 @@ export function startDashboard(): void {
     res.end('Not found');
   });
 
-  server.listen(DASHBOARD_PORT, () => {
-    logger.info({ port: DASHBOARD_PORT }, 'Dashboard started');
+  const port = options.port ?? DASHBOARD_PORT;
+  server.listen(port, () => {
+    logger.info({ port }, 'Dashboard started');
   });
+
+  return server;
 }

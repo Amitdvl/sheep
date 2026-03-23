@@ -228,8 +228,9 @@ export class GmailChannel implements Channel {
 
     const headers = msg.data.payload?.headers || [];
     const getHeader = (name: string) =>
-      headers.find((header) => header.name?.toLowerCase() === name.toLowerCase())
-        ?.value || '';
+      headers.find(
+        (header) => header.name?.toLowerCase() === name.toLowerCase(),
+      )?.value || '';
 
     const from = getHeader('From');
     const subject = getHeader('Subject');
@@ -264,7 +265,10 @@ export class GmailChannel implements Channel {
     const groups = this.opts.registeredGroups();
     const mainEntry = Object.entries(groups).find(([, group]) => group.isMain);
     if (!mainEntry) {
-      logger.debug({ chatJid, subject }, 'No main group registered, skipping email');
+      logger.debug(
+        { chatJid, subject },
+        'No main group registered, skipping email',
+      );
       return;
     }
 
