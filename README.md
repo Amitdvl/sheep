@@ -128,7 +128,7 @@ The bot replies with your exact registration ID, for example:
 
 ```text
 Chat ID: `tg:123456789`
-Name: the user
+Name: Example User
 Type: private
 ```
 
@@ -206,7 +206,7 @@ Sheep maintains persistent memory in a group folder such as `groups/telegram_mai
 
 | File | Purpose |
 |------|---------|
-| `profile.md` | Core facts, identity, mission |
+| `profile.md` | Core context, identity, mission |
 | `commitments.md` | Tracked promises with deadlines |
 | `projects.md` | Active projects and status |
 | `patterns.md` | Behavioral patterns (good and bad) |

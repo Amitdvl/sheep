@@ -1,11 +1,11 @@
-# the user's Projects
+# User Projects
 
 ## Active
 (Update as projects are discussed)
 
 ### Platform (TBD)
 - **Status:** In progress
-- **Details:** the user mentioned building a platform but hasn't specified details yet. ASK ABOUT THIS.
+- **Details:** The user mentioned building a platform but hasn't specified details yet. ASK ABOUT THIS.
 - **Stack:** Likely TypeScript, Supabase, modern web (based on dev environment)
 - **Last discussed:** Not yet
 

@@ -1,4 +1,4 @@
-# the user's Patterns
+# User Patterns
 
 Track recurring behaviors — both good and bad. Use these to give sharper advice.
 
